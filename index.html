@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Add custom icons with Markers</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v1.11.1/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v1.11.1/mapbox-gl.css" rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+        
+        .marker {
+            display: block;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            padding: 0;
+        }
+        /* Tooltip container */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dotted black;
+            /* If you want dots under the hoverable text */
+        }
+
+        /* Tooltip text */
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            padding: 5px 0;
+            border-radius: 6px;
+
+            /* Position the tooltip text */
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+
+            /* Fade in tooltip */
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        /* Tooltip arrow */
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #555 transparent transparent transparent;
+        }
+
+        /* Show the tooltip text when you mouse over the tooltip container */
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <style>
+    </style>
+
+    <div id="map"></div>
+
+    <script>
+        mapboxgl.accessToken =
+            'pk.eyJ1IjoibW9uaXJ3b293IiwiYSI6ImNrY2hweTc0dDBjc3Uycm52bWtzZmFiZzgifQ.zB2xMqvwVyePRldQohEA4w';
+        var geojson = {
+            'type': 'FeatureCollection',
+            'features': [{
+                    'type': 'Feature',
+                    'properties': {
+                        'description': '<strong>wOOw Bangladesh</strong><address>House # 125, Road # 01 Baridhara DOHS,Dhaka, Bangladesh<br>Hotline : 09606-141414 <br>Landline :+88-02-8413106,+88-02-8413107<br>Email : info@woowbd.com</address>',
+                        'message': '<strong>wOOw Bangladesh</strong><address>House # 125, Road # 01 Baridhara DOHS,Dhaka, Bangladesh<br>Hotline : 09606-141414 <br>Landline :+88-02-8413106,+88-02-8413107<br>Email : info@woowbd.com</address>',
+                        'iconSize': [60, 60]
+                    },
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [90.411198, 23.815044]
+                    }
+                },
+                {
+                    'type': 'Feature',
+                    'properties': {
+                        'description': '<strong>wOOw India</strong><address>Mirza Ghalib Street Kolkata -700016 India <br>india@woowbd.com</address>',
+                        'message': '<strong>wOOw India</strong><address>Mirza Ghalib Street Kolkata -700016 India <br>india@woowbd.com</address>',
+                        'iconSize': [60, 60]
+                    },
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [88.3540496, 22.5578878]
+                    }
+                },
+                {
+                    'type': 'Feature',
+                    'properties': {
+                        'description': '<strong>wOOw China</strong><address></address>',
+                        'message': '<strong>wOOw China</strong><address></address>',
+                        'iconSize': [60, 60]
+                    },
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [113.3226682, 23.1402154]
+                    }
+                },
+                {
+                    'type': 'Feature',
+                    'properties': {
+                        'description': '<strong>wOOw Thailand</strong><address></address>',
+                        'message': '<strong>wOOw Thailand</strong><address></address>',
+                        'iconSize': [60, 60]
+                    },
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [100.5679832, 13.7252888]
+                    }
+                },
+                {
+                    'type': 'Feature',
+                    'properties': {
+                        'description': "<strong>wOOw UK</strong><address></address>",
+                        'message': '<strong>wOOw UK</strong><address></address>',
+                        'iconSize': [60, 60]
+                    },
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [0.0416784, 51.5508002]
+                    }
+                },
+                {
+                    'type': 'Feature',
+                    'properties': {
+                        'description': '<strong>wOOw USA</strong><address></address>',
+                        'message': '<strong>wOOw USA</strong><address></address>',
+                        'iconSize': [60, 60]
+                    },
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [-75.2766748, 39.9597215]
+                    }
+                }
+            ]
+        };
+
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/light-v10',
+            center: [32.8647765, 35.1686323],
+            zoom: 3
+        });
+
+
+        // Create a popup, but don't add it to the map yet.
+        var popup = new mapboxgl.Popup({
+            closeButton: false,
+            closeOnClick: false
+        });
+
+        // add markers to map
+        geojson.features.forEach(function (marker) {
+            // create a DOM element for the marker
+            var el = document.createElement('div');
+            el.className = 'marker';
+            el.style.backgroundImage =
+                'url(map-location-icon.svg)';
+            el.style.width = marker.properties.iconSize[0] + 'px';
+            el.style.height = marker.properties.iconSize[1] + 'px';
+            el.style.content = marker.message;
+
+            el.addEventListener('click', function () {
+                map.flyTo({
+                    center: marker.geometry.coordinates,
+                    zoom: 19
+                });
+
+                var coordinates = marker.geometry.coordinates;
+                var description = marker.properties.description;
+                popup
+                    .setLngLat(coordinates)
+                    .setHTML(description)
+                    .addTo(map);
+            });
+
+            // add marker to map
+            new mapboxgl.Marker(el)
+                .setLngLat(marker.geometry.coordinates)
+                .addTo(map);
+            // Create a popup, but don't add it to the map yet.
+            var popup = new mapboxgl.Popup({
+                closeButton: false,
+                closeOnClick: false
+            });
+
+            map.on('mouseenter', 'places', function (e) {
+                // Change the cursor style as a UI indicator.
+                map.getCanvas().style.cursor = 'pointer';
+
+                var coordinates = e.features[0].geometry.coordinates.slice();
+                var description = e.features[0].properties.description;
+
+                // Ensure that if the map is zoomed out such that multiple
+                // copies of the feature are visible, the popup appears
+                // over the copy being pointed to.
+                while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                }
+
+                // Populate the popup and set its coordinates
+                // based on the feature found.
+                popup
+                    .setLngLat(coordinates)
+                    .setHTML(description)
+                    .addTo(map);
+            });
+
+            map.on('mouseleave', 'places', function () {
+                map.getCanvas().style.cursor = '';
+                popup.remove();
+            });
+        });
+    </script>
+
+</body>
+
+</html>
