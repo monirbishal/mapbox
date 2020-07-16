@@ -1,0 +1,163 @@
+<script>
+    mapboxgl.accessToken =
+        'pk.eyJ1IjoibW9uaXJ3b293IiwiYSI6ImNrY2hweTc0dDBjc3Uycm52bWtzZmFiZzgifQ.zB2xMqvwVyePRldQohEA4w';
+    var geojson = {
+        'type': 'FeatureCollection',
+        'features': [{
+                'type': 'Feature',
+                'properties': {
+                    'description': '<strong>wOOw Bangladesh</strong><address>House # 125, Road # 01 Baridhara DOHS,Dhaka, Bangladesh<br>Hotline : 09606-141414 <br>Landline :+88-02-8413106,+88-02-8413107<br>Email : info@woowbd.com</address>',
+                    'iconSize': [60, 60]
+                },
+                'geometry': {
+                    'type': 'Point',
+                    'coordinates': [90.411198, 23.815044]
+                }
+            },
+            {
+                'type': 'Feature',
+                'properties': {
+                    'description': '<strong>wOOw India</strong><address>Mirza Ghalib Street Kolkata -700016 India <br>india@woowbd.com</address>',
+                    'iconSize': [60, 60]
+                },
+                'geometry': {
+                    'type': 'Point',
+                    'coordinates': [88.3540496, 22.5578878]
+                }
+            },
+            {
+                'type': 'Feature',
+                'properties': {
+                    'description': '<strong>wOOw China</strong><address>Room No 06, Building 8,<br>International Trade Center Xintang,<br> Guangzhou,China <br> china@woowbd.com</address>',
+                    'iconSize': [60, 60]
+                },
+                'geometry': {
+                    'type': 'Point',
+                    'coordinates': [113.3226682, 23.1402154]
+                }
+            },
+            {
+                'type': 'Feature',
+                'properties': {
+                    'description': '<strong>wOOw Thailand</strong><address>19/31, 2nd Floor, Sukhumvit Suits, Soi 3,<br>Sukhumvit Road, Klong Toei Nuea, Wattana, 0110<br>Bangkok, Thailand<br>thailand@woowbd.com</address>',
+                    'iconSize': [60, 60]
+                },
+                'geometry': {
+                    'type': 'Point',
+                    'coordinates': [100.5679832, 13.7252888]
+                }
+            },
+            {
+                'type': 'Feature',
+                'properties': {
+                    'description': "<strong>wOOw UK</strong><address>16 Albany road,<br>Manor Park,<br>London E12 5BE<br>uk@woowbd.com</address>",
+                    'iconSize': [60, 60]
+                },
+                'geometry': {
+                    'type': 'Point',
+                    'coordinates': [0.0416784, 51.5508002]
+                }
+            },
+            {
+                'type': 'Feature',
+                'properties': {
+                    'description': '<strong>wOOw USA</strong>7204 Hazel Ave,<br>Upper Darby,<br>PA 19082<br>usa@woowbd.com<address></address>',
+                    'iconSize': [60, 60]
+                },
+                'geometry': {
+                    'type': 'Point',
+                    'coordinates': [-75.2766748, 39.9597215]
+                }
+            }
+        ]
+    };
+
+    var start = [32.8647765, 35.1686323];
+    var zoomstart = 1;
+
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/light-v10',
+        center: start,
+        zoom: zoomstart
+    });
+
+
+    // Create a popup, but don't add it to the map yet.
+    var popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false
+    });
+
+    var isAtStart = true;
+    var isAtZoom = true;
+
+    // add markers to map
+    geojson.features.forEach(function (marker) {
+        // create a DOM element for the marker
+        var el = document.createElement('div');
+        el.className = 'marker';
+        el.style.backgroundImage = 'url(images/common/map-location-icon.svg)';
+        el.style.width = marker.properties.iconSize[0] + 'px';
+        el.style.height = marker.properties.iconSize[1] + 'px';
+        el.style.content = marker.message;
+
+        el.addEventListener('click', function () {
+            var end = marker.geometry.coordinates;
+            var zoomend = 19;
+            var target = isAtStart ? end : start;
+            var zoomtarget = isAtZoom ? zoomend : zoomstart;
+
+            isAtStart = !isAtStart;
+            isAtZoom = !isAtZoom;
+            map.flyTo({
+                center: target,
+                zoom: zoomtarget
+            });
+
+            var coordinates = marker.geometry.coordinates;
+            var description = marker.properties.description;
+            popup
+                .setLngLat(coordinates)
+                .setHTML(description)
+                .addTo(map);
+        });
+
+        // add marker to map
+        new mapboxgl.Marker(el)
+            .setLngLat(marker.geometry.coordinates)
+            .addTo(map);
+        // Create a popup, but don't add it to the map yet.
+        var popup = new mapboxgl.Popup({
+            closeButton: true,
+            closeOnClick: false
+        });
+
+        map.on('mouseenter', 'places', function (e) {
+            // Change the cursor style as a UI indicator.
+            map.getCanvas().style.cursor = 'pointer';
+
+            var coordinates = e.features[0].geometry.coordinates.slice();
+            var description = e.features[0].properties.description;
+
+            // Ensure that if the map is zoomed out such that multiple
+            // copies of the feature are visible, the popup appears
+            // over the copy being pointed to.
+            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+            }
+
+            // Populate the popup and set its coordinates
+            // based on the feature found.
+            popup
+                .setLngLat(coordinates)
+                .setHTML(description)
+                .addTo(map);
+        });
+
+        map.on('mouseleave', 'places', function () {
+            map.getCanvas().style.cursor = '';
+            popup.remove();
+        });
+    });
+</script>
